@@ -6,7 +6,7 @@ class Boat : AbstractTransport(Location.PORT) {
         this.cargo = cargo
         this.step = 1
         this.destination = cargo.destination
-        this.location = cargo.orgin
+        this.location = cargo.origin
         this.cargo?.linkedToVehicleOrBoat = true
     }
 }
