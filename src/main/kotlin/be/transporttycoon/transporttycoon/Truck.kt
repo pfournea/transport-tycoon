@@ -1,41 +1,21 @@
 package be.transporttycoon.transporttycoon
 
-class Truck {
-    var position: Int = 0
-    private var deliveryPosition: Int = Int.MIN_VALUE
-    var transport: Transport? = null
-    var step = 1
+class Truck : AbstractTransport(Location.FACTORY) {
 
-    fun atFactory(): Boolean = position == 0
 
-    fun atDestination(): Boolean = position == deliveryPosition
-
-    fun loadTransport(transport: Transport) {
-        deliveryPosition = when (transport.destination) {
-            Destination.A -> 1
-            Destination.B -> 5
+    override fun loadTransport(cargo: Cargo) {
+//        deliveryPosition = when (cargo.destination) {
+//            Location.A -> 1
+//            Location.B -> 5
+//        }
+        destination =  when (cargo.destination) {
+            Location.A -> Location.PORT
+            else -> cargo.destination
         }
-        this.transport = transport
-        this.transport?.linkedToVehicleOrBoat = true
+        this.cargo = cargo
+        this.location = cargo.orgin
+        this.cargo?.linkedToVehicleOrBoat = true
         step = 1
     }
-
-    fun move() {
-        transport?.let {
-            position += step
-            it.move()
-        }
-        if (returningToFactory()) {
-            position += step
-        }
-    }
-
-    fun unload() {
-        transport?.linkedToVehicleOrBoat = false
-        transport = null
-        step = -1
-    }
-
-    fun returningToFactory(): Boolean = transport == null && atFactory().not()
 
 }

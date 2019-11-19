@@ -1,9 +1,9 @@
 package be.transporttycoon.transporttycoon
 
 class Port {
-    val transportList = mutableListOf<Transport>()
+    val transportList = mutableListOf<Cargo>()
 
-    fun getOldestTransport(): Transport? {
+    fun getOldestTransport(): Cargo? {
         return if (transportList.isNotEmpty()) {
             transportList.removeAt(0)
         } else {

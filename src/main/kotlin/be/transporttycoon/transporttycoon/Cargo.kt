@@ -1,6 +1,6 @@
 package be.transporttycoon.transporttycoon
 
-class Transport(val destination: Destination) {
+class Cargo(val destination: Location, val id : Long, val orgin : Location = Location.FACTORY) {
     var position = 0
     var linkedToVehicleOrBoat = false
 

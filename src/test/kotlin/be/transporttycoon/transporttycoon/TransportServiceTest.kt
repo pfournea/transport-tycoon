@@ -6,21 +6,21 @@ internal class TransportServiceTest {
 
     @Test
     fun testA() {
-        val transportList = listOf(Transport(Destination.A))
+        val transportList = listOf(Cargo(Location.A, 1))
         val processTime = TransportService.getTimeToHandleTransport(transportList)
         assert(processTime == 5)
     }
 
     @Test
     fun testAB() {
-        val transportList = listOf(Transport(Destination.A), Transport(Destination.B))
+        val transportList = listOf(Cargo(Location.A,1), Cargo(Location.B, 2))
         val processTime = TransportService.getTimeToHandleTransport(transportList)
         assert(processTime == 5)
     }
 
     @Test
     fun testBB() {
-        val transportList = listOf(Transport(Destination.B), Transport(Destination.B))
+        val transportList = listOf(Cargo(Location.B,1), Cargo(Location.B,2))
         val processTime = TransportService.getTimeToHandleTransport(transportList)
         assert(processTime == 5)
     }
@@ -39,7 +39,8 @@ internal class TransportServiceTest {
         assert(processTime == 41)
     }
 
-    private fun createTransportList(s: String): List<Transport> {
-        return s.toCharArray().map { Transport(Destination.valueOf(it.toString())) }
+    private fun createTransportList(s: String): List<Cargo> {
+        var id : Long = 0
+        return s.toCharArray().map { Cargo(Location.valueOf(it.toString()), id++) }
     }
 }
