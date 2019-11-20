@@ -11,7 +11,6 @@ class Truck : AbstractTransport(Location.FACTORY) {
         this.cargo = cargo
         this.location = cargo.origin
         this.cargo?.linkedToVehicleOrBoat = true
-        step = 1
     }
 
 }
