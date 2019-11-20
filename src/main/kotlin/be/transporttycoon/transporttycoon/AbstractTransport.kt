@@ -16,18 +16,18 @@ abstract class AbstractTransport(val startLocation : Location) {
     fun move() {
         cargo?.let {
             position += 1
-            it.move()
         }
         if (returningToDeparture()) {
             position += -1
         }
     }
 
-    fun unload() : Cargo? {
+    fun unload() : Cargo {
         val cargoToUnload = this.cargo
-        cargo?.linkedToVehicleOrBoat = false
+        cargo!!.linkedToVehicleOrBoat = false
+        cargo!!.dropOfLocation = destination
         cargo = null
-        return cargoToUnload
+        return cargoToUnload!!
     }
 
     fun returningToDeparture(): Boolean = cargo == null && atDeparture().not()

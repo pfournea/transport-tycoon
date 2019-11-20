@@ -9,7 +9,7 @@ class Boat : AbstractTransport(Location.PORT) {
     override fun loadTransport(cargo: Cargo) {
         this.cargo = cargo
         this.destination = cargo.destination
-        this.location = cargo.origin
+        this.location = cargo.originLocation
         this.cargo?.linkedToVehicleOrBoat = true
     }
 }

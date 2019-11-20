@@ -9,7 +9,7 @@ class Truck : AbstractTransport(Location.FACTORY) {
             else -> cargo.destination
         }
         this.cargo = cargo
-        this.location = cargo.origin
+        this.location = cargo.originLocation
         this.cargo?.linkedToVehicleOrBoat = true
     }
 

@@ -3,21 +3,24 @@ package be.transporttycoon.transporttycoon
 object TransportService {
 
     fun getTimeToHandleTransport(cargoList: List<Cargo>): Int {
-        var totalTime = 0
+        val mutableCargoList = cargoList.toMutableList()
+        var totalTime = -1
         val truck1 = Truck()
         val truck2 = Truck()
         val boat = Boat()
         val trucks = listOf(truck1, truck2)
         val port = Port()
-        while (cargoList.any { it.arrivedAtDestination().not() }) {
+        do {
+            totalTime += 1
+
             trucks.forEach { truck ->
                 if (truck.atDeparture()) {
-                    val transportAvailableForTruck = findTransportForTruck(cargoList)
+                    val transportAvailableForTruck = findTransportForTruck(mutableCargoList)
                     transportAvailableForTruck?.let { truck.loadTransport(it) }
                 }
                 if (truck.atDestination()) {
                     val cargoAtDestination = truck.unload()
-                    if (truck.destination == Location.PORT && cargoAtDestination != null) {
+                    if (truck.destination == Location.PORT) {
                         port.transportList.add(cargoAtDestination)
                     }
                 }
@@ -34,9 +37,7 @@ object TransportService {
             }
 
             boat.move()
-
-            totalTime += 1
-        }
+        } while (cargoList.any { it.arrivedAtDestination().not() })
         return totalTime
     }
 
@@ -44,6 +45,5 @@ object TransportService {
         return port.getOldestTransport()
     }
 
-    private fun findTransportForTruck(cargoList: List<Cargo>) =
-            cargoList.firstOrNull { transport -> transport.atFactory() && transport.linkedToVehicleOrBoat.not() }
+    private fun findTransportForTruck(cargoList: MutableList<Cargo>) = if (cargoList.isEmpty()) null else cargoList.removeAt(0)
 }
