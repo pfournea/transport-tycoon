@@ -1,49 +1,53 @@
 package be.transporttycoon.transporttycoon
 
+import be.transporttycoon.transporttycoon.domain.*
+import be.transporttycoon.transporttycoon.domain.event.Event
+import be.transporttycoon.transporttycoon.domain.event.PrintEventsListener
+import be.transporttycoon.transporttycoon.integration.InMemoryEventRepository
+import be.transporttycoon.transporttycoon.integration.SimpleEventBus
+import be.transporttycoon.transporttycoon.util.EventToJsonUtil
+import java.io.BufferedWriter
+import java.io.File
+
 object TransportService {
 
     fun getTimeToHandleTransport(cargoList: List<Cargo>): Int {
-        val mutableCargoList = cargoList.toMutableList()
-        var totalTime = -1
-        val truck1 = Truck()
-        val truck2 = Truck()
-        val boat = Boat()
-        val trucks = listOf(truck1, truck2)
-        val port = Port()
-        do {
-            totalTime += 1
+        val eventRepository = InMemoryEventRepository()
+        SimpleEventBus.addEventListeners(setOf(PrintEventsListener(), eventRepository))
+        //create Factory
+        val factory = Factory(cargos = cargoList.toMutableList())
+        val port = Port(cargoStorage = mutableListOf())
+        //create transports
+        val truck_1 = Transport.createTruck(0)
+        val truck_2 = Transport.createTruck(1)
+        val boat = Transport.createBoat(2)
+        val timer = Timer
+        val world = World(factory, port, timer)
+        timer.resetTime()
 
-            trucks.forEach { truck ->
-                if (truck.atDeparture()) {
-                    val transportAvailableForTruck = findTransportForTruck(mutableCargoList)
-                    transportAvailableForTruck?.let { truck.loadTransport(it) }
-                }
-                if (truck.atDestination()) {
-                    val cargoAtDestination = truck.unload()
-                    if (truck.destination == Location.PORT) {
-                        port.transportList.add(cargoAtDestination)
-                    }
-                }
-                truck.move()
-            }
-
-            if (boat.atDeparture()) {
-                val transport = findTransportForBoat(port)
-                transport?.let { boat.loadTransport(it) }
-            }
-
-            if (boat.atDestination()) {
-                boat.unload()
-            }
-
-            boat.move()
-        } while (cargoList.any { it.arrivedAtDestination().not() })
-        return totalTime
+        while (atLeastOneCargoNotYetArrivedOnDestination(cargoList)) {
+            timer.increaseTime()
+            truck_1.move(world)
+            truck_2.move(world)
+            boat.move(world)
+        }
+        dropAllEventsToFile(cargoList.map { it.destinationLocation.name }.joinToString(separator = ""), eventRepository.getAllEvents())
+        return timer.time
     }
 
-    private fun findTransportForBoat(port: Port): Cargo? {
-        return port.getOldestTransport()
+    private fun dropAllEventsToFile(fileName: String, allEvents: List<Event>) {
+        val file = File("$fileName.log")
+        val isFileCreated = file.createNewFile()
+        if(!isFileCreated) {
+            file.delete()
+            file.createNewFile()
+        }
+        val bw = file.bufferedWriter()
+        bw.use { bufferedWriter: BufferedWriter -> allEvents.map { event -> bufferedWriter.write(EventToJsonUtil.toString(event))
+        bufferedWriter.newLine()} }
     }
 
-    private fun findTransportForTruck(cargoList: MutableList<Cargo>) = if (cargoList.isEmpty()) null else cargoList.removeAt(0)
+    fun atLeastOneCargoNotYetArrivedOnDestination(cargoList: List<Cargo>): Boolean {
+        return cargoList.find { it.cargoOnDestination().not() } != null
+    }
 }
